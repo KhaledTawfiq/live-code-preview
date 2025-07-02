@@ -1,28 +1,39 @@
 import { useState, useEffect } from 'react';
 
 interface ProjectData {
-  projectInfo: {
+  appFiles: Record<string, {
     name: string;
-    description: string;
-    type: string;
-    technologies: string[];
-    createdAt: string;
-  };
-  structure: Record<string, unknown>;
-  files: Record<string, {
-    type: string;
-    purpose: string;
-    content: string;
-    [key: string]: unknown;
+    type: 'file' | 'folder';
+    contents?: string;
+    fullPath: string;
+    lastModified: number;
+    ignored: boolean;
+    isBinary?: boolean;
   }>;
-  features: {
-    core: string[];
-    technical: string[];
-  };
   dependencies: {
-    runtime: Record<string, string>;
-    development: Record<string, string>;
+    jpack: {
+      warnings: Record<string, unknown>;
+      appDependencies: Record<string, {
+        main: string;
+        version: string;
+        dependencies: Record<string, string>;
+      }>;
+      resDependencies: Record<string, {
+        main?: string;
+        dependencies: Record<string, string>;
+      }>;
+    };
+    externalDeps: unknown[];
+    externalResources: unknown[];
   };
+  settings: {
+    compile: {
+      action: string;
+      trigger: string;
+      clearConsole: boolean;
+    };
+  };
+  editedAt: string;
 }
 
 export const useProjectData = () => {
