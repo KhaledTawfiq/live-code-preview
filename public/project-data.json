@@ -1,0 +1,249 @@
+{
+  "projectInfo": {
+    "name": "TaskMaster Todo Application",
+    "description": "A comprehensive todo application with both vanilla JavaScript and React TypeScript implementations",
+    "type": "Full-stack Todo App",
+    "technologies": ["HTML", "CSS", "JavaScript", "React", "TypeScript", "Vite", "Tailwind CSS"],
+    "createdAt": "2025-06-13T00:00:00.000Z"
+  },
+  "structure": {
+    "rootFiles": [
+      "package.json",
+      "index.html",
+      "app.js", 
+      "style.css",
+      "vite.config.ts",
+      "tsconfig.json",
+      "tsconfig.app.json", 
+      "tsconfig.node.json",
+      "eslint.config.js",
+      "postcss.config.js",
+      "tailwind.config.js"
+    ],
+    "directories": {
+      "src": {
+        "files": ["App.tsx", "main.tsx", "index.css", "vite-env.d.ts"],
+        "subdirectories": {
+          "components": ["Header.tsx", "TodoForm.tsx", "TodoList.tsx", "TodoItem.tsx", "TodoFilter.tsx"],
+          "hooks": ["useTodos.tsx"],
+          "types": ["todo.ts"],
+          "utils": ["storage.ts"]
+        }
+      }
+    }
+  },
+  "files": {
+    "package.json": {
+      "type": "json",
+      "purpose": "Project dependencies and scripts configuration",
+      "content": {
+        "name": "vite-react-typescript-starter",
+        "private": true,
+        "version": "0.0.0",
+        "type": "module",
+        "scripts": {
+          "dev": "vite",
+          "build": "vite build",
+          "lint": "eslint .",
+          "preview": "vite preview"
+        },
+        "dependencies": {
+          "lucide-react": "^0.344.0",
+          "react": "^18.3.1",
+          "react-dom": "^18.3.1"
+        },
+        "devDependencies": {
+          "@eslint/js": "^9.9.1",
+          "@types/react": "^18.3.5",
+          "@types/react-dom": "^18.3.0",
+          "@vitejs/plugin-react": "^4.3.1",
+          "autoprefixer": "^10.4.18",
+          "eslint": "^9.9.1",
+          "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+          "eslint-plugin-react-refresh": "^0.4.11",
+          "globals": "^15.9.0",
+          "postcss": "^8.4.35",
+          "tailwindcss": "^3.4.1",
+          "typescript": "^5.5.3",
+          "typescript-eslint": "^8.3.0",
+          "vite": "^5.4.2"
+        }
+      }
+    },
+    "index.html": {
+      "type": "html",
+      "purpose": "Main HTML page for vanilla JavaScript version",
+      "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>TaskMaster | Organize Your Tasks</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n  <div class=\"container\">\n    <header>\n      <div class=\"logo\">\n        <svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n          <rect width=\"16\" height=\"16\" x=\"4\" y=\"4\" rx=\"2\"></rect>\n          <path d=\"m9 12 2 2 4-4\"></path>\n        </svg>\n        <h1>TaskMaster</h1>\n      </div>\n    </header>\n\n    <main>\n      <form id=\"todo-form\" class=\"todo-form\">\n        <div class=\"input-group\">\n          <input type=\"text\" id=\"todo-input\" placeholder=\"What needs to be done?\" required>\n          <textarea id=\"todo-description\" placeholder=\"Add description... (optional)\" class=\"hidden\"></textarea>\n        </div>\n        <div class=\"form-actions\">\n          <button type=\"button\" id=\"toggle-description\" class=\"btn-secondary\">\n            Add details\n          </button>\n          <button type=\"submit\" class=\"btn-primary\">Add Task</button>\n        </div>\n      </form>\n\n      <div class=\"todo-filters\">\n        <div class=\"filter-buttons\">\n          <button class=\"filter-btn active\" data-filter=\"all\">All</button>\n          <button class=\"filter-btn\" data-filter=\"active\">Active</button>\n          <button class=\"filter-btn\" data-filter=\"completed\">Completed</button>\n        </div>\n        <button id=\"clear-completed\" class=\"btn-danger hidden\">\n          Clear completed\n        </button>\n      </div>\n\n      <div id=\"todo-list\" class=\"todo-list\"></div>\n    </main>\n\n    <footer>\n      <p>TaskMaster &copy; 2024</p>\n    </footer>\n  </div>\n\n  <script src=\"app.js\"></script>\n</body>\n</html>"
+    },
+    "app.js": {
+      "type": "javascript",
+      "purpose": "Main JavaScript logic for vanilla implementation",
+      "features": ["Todo class definition", "DOM manipulation", "Local storage", "Event handling", "CRUD operations"],
+      "functions": [
+        "Todo class constructor",
+        "saveTodos",
+        "loadTodos", 
+        "createTodoElement",
+        "renderTodos",
+        "toggleTodo",
+        "deleteTodo",
+        "editTodo",
+        "updateClearCompletedButton"
+      ],
+      "content": "// Todo type definition\nclass Todo {\n  constructor(title, description = '') {\n    this.id = crypto.randomUUID();\n    this.title = title;\n    this.description = description;\n    this.completed = false;\n    this.createdAt = new Date();\n  }\n}\n\n// DOM Elements\nconst todoForm = document.getElementById('todo-form');\nconst todoInput = document.getElementById('todo-input');\nconst todoDescription = document.getElementById('todo-description');\nconst toggleDescription = document.getElementById('toggle-description');\nconst todoList = document.getElementById('todo-list');\nconst filterButtons = document.querySelectorAll('.filter-btn');\nconst clearCompletedBtn = document.getElementById('clear-completed');\n\n// State\nlet todos = [];\nlet currentFilter = 'all';\n\n// Local Storage\nconst STORAGE_KEY = 'todo-app-tasks';\n\nconst saveTodos = () => {\n  localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));\n};\n\nconst loadTodos = () => {\n  const stored = localStorage.getItem(STORAGE_KEY);\n  if (stored) {\n    todos = JSON.parse(stored).map(todo => ({\n      ...todo,\n      createdAt: new Date(todo.createdAt)\n    }));\n    renderTodos();\n    updateClearCompletedButton();\n  }\n};\n\n// Event Listeners and remaining functionality continues..."
+    },
+    "style.css": {
+      "type": "css",
+      "purpose": "Styling for vanilla JavaScript version",
+      "features": ["CSS Variables", "Modern gradients", "Responsive design", "Hover effects", "Animation transitions"],
+      "content": ":root {\n  --primary: #3b82f6;\n  --primary-hover: #2563eb;\n  --danger: #ef4444;\n  --danger-hover: #dc2626;\n  --success: #22c55e;\n  --gray-50: #f9fafb;\n  --gray-100: #f3f4f6;\n  --gray-200: #e5e7eb;\n  --gray-300: #d1d5db;\n  --gray-400: #9ca3af;\n  --gray-500: #6b7280;\n  --gray-600: #4b5563;\n  --gray-700: #374151;\n  --gray-800: #1f2937;\n}\n\n* {\n  margin: 0;\n  padding: 0;\n  box-sizing: border-box;\n}\n\nbody {\n  font-family: system-ui, -apple-system, sans-serif;\n  line-height: 1.5;\n  background: linear-gradient(to bottom right, #eff6ff, #f5f3ff);\n  min-height: 100vh;\n  color: var(--gray-800);\n}\n\n/* Additional styles continue... */"
+    },
+    "vite.config.ts": {
+      "type": "typescript",
+      "purpose": "Vite build configuration",
+      "content": "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\n\n// https://vitejs.dev/config/\nexport default defineConfig({\n  plugins: [react()],\n  optimizeDeps: {\n    exclude: ['lucide-react'],\n  },\n});"
+    },
+    "src/types/todo.ts": {
+      "type": "typescript",
+      "purpose": "TypeScript type definitions",
+      "exports": ["Todo interface", "TodoStatus type"],
+      "content": "export interface Todo {\n  id: string;\n  title: string;\n  description?: string;\n  completed: boolean;\n  createdAt: Date;\n}\n\nexport type TodoStatus = 'all' | 'active' | 'completed';"
+    },
+    "src/App.tsx": {
+      "type": "react-component",
+      "purpose": "Main React application component",
+      "hooks": ["useTodos"],
+      "components": ["Header", "TodoForm", "TodoList", "TodoFilter"],
+      "content": "import React from 'react';\nimport Header from './components/Header';\nimport TodoForm from './components/TodoForm';\nimport TodoList from './components/TodoList';\nimport TodoFilter from './components/TodoFilter';\nimport { useTodos } from './hooks/useTodos';\n\nfunction App() {\n  const {\n    todos,\n    status,\n    setStatus,\n    addTodo,\n    toggleTodo,\n    deleteTodo,\n    editTodo,\n    clearCompleted,\n    totalActive,\n    totalCompleted,\n    total\n  } = useTodos();\n\n  return (\n    <div className=\"min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 px-4 py-12\">\n      <div className=\"mx-auto max-w-lg\">\n        <Header />\n        \n        <main className=\"mt-6\">\n          <TodoForm onAdd={addTodo} />\n          \n          <TodoFilter\n            status={status}\n            setStatus={setStatus}\n            totalActive={totalActive}\n            totalCompleted={totalCompleted}\n            total={total}\n            onClearCompleted={clearCompleted}\n          />\n          \n          <TodoList\n            todos={todos}\n            onToggle={toggleTodo}\n            onDelete={deleteTodo}\n            onEdit={editTodo}\n          />\n        </main>\n        \n        <footer className=\"mt-12 text-center text-sm text-gray-500\">\n          <p>TaskMaster &copy; {new Date().getFullYear()}</p>\n        </footer>\n      </div>\n    </div>\n  );\n}\n\nexport default App;"
+    },
+    "src/hooks/useTodos.tsx": {
+      "type": "react-hook",
+      "purpose": "Custom React hook for todo state management",
+      "features": ["State management", "Local storage integration", "Filtering", "CRUD operations"],
+      "functions": [
+        "addTodo",
+        "toggleTodo", 
+        "deleteTodo",
+        "editTodo",
+        "clearCompleted",
+        "reorderTodos",
+        "filterTodos"
+      ],
+      "content": "import { useState, useEffect } from 'react';\nimport { Todo, TodoStatus } from '../types/todo';\nimport { getTodosFromStorage, saveTodosToStorage } from '../utils/storage';\n\nexport const useTodos = () => {\n  const [todos, setTodos] = useState<Todo[]>([]);\n  const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);\n  const [status, setStatus] = useState<TodoStatus>('all');\n  \n  // Load todos from localStorage on initial render\n  useEffect(() => {\n    const storedTodos = getTodosFromStorage();\n    setTodos(storedTodos);\n  }, []);\n  \n  // Save todos to localStorage whenever they change\n  useEffect(() => {\n    saveTodosToStorage(todos);\n    filterTodos();\n  }, [todos, status]);\n  \n  // Additional hook logic continues...\n};"
+    },
+    "src/components/Header.tsx": {
+      "type": "react-component",
+      "purpose": "Application header with logo and title",
+      "dependencies": ["lucide-react"],
+      "content": "import React from 'react';\nimport { CheckSquare } from 'lucide-react';\n\nconst Header: React.FC = () => {\n  return (\n    <header className=\"mb-8 flex items-center justify-center\">\n      <div className=\"flex items-center space-x-2\">\n        <CheckSquare className=\"h-8 w-8 text-blue-500\" />\n        <h1 className=\"text-3xl font-bold text-gray-800\">TaskMaster</h1>\n      </div>\n    </header>\n  );\n};\n\nexport default Header;"
+    },
+    "src/components/TodoForm.tsx": {
+      "type": "react-component", 
+      "purpose": "Form component for adding new todos",
+      "features": ["Controlled inputs", "Optional description", "Form validation"],
+      "props": ["onAdd"],
+      "state": ["title", "description", "showDescription"],
+      "content": "import React, { useState } from 'react';\nimport { Plus } from 'lucide-react';\n\ninterface TodoFormProps {\n  onAdd: (title: string, description?: string) => void;\n}\n\nconst TodoForm: React.FC<TodoFormProps> = ({ onAdd }) => {\n  const [title, setTitle] = useState('');\n  const [description, setDescription] = useState('');\n  const [showDescription, setShowDescription] = useState(false);\n  \n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    if (title.trim()) {\n      onAdd(title, description);\n      setTitle('');\n      setDescription('');\n      if (!description) {\n        setShowDescription(false);\n      }\n    }\n  };\n  \n  // Component JSX continues...\n};"
+    },
+    "src/components/TodoList.tsx": {
+      "type": "react-component",
+      "purpose": "Container component for displaying list of todos",
+      "props": ["todos", "onToggle", "onDelete", "onEdit"],
+      "features": ["Empty state", "Todo item rendering"],
+      "content": "import React from 'react';\nimport { Todo } from '../types/todo';\nimport TodoItem from './TodoItem';\n\ninterface TodoListProps {\n  todos: Todo[];\n  onToggle: (id: string) => void;\n  onDelete: (id: string) => void;\n  onEdit: (id: string, title: string, description?: string) => void;\n}\n\nconst TodoList: React.FC<TodoListProps> = ({ todos, onToggle, onDelete, onEdit }) => {\n  if (todos.length === 0) {\n    return (\n      <div className=\"flex min-h-[150px] flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 p-8\">\n        <p className=\"text-center text-gray-500\">No tasks to display</p>\n        <p className=\"mt-2 text-center text-sm text-gray-400\">\n          Add a new task to get started\n        </p>\n      </div>\n    );\n  }\n\n  return (\n    <div className=\"space-y-1\">\n      {todos.map((todo) => (\n        <TodoItem\n          key={todo.id}\n          todo={todo}\n          onToggle={onToggle}\n          onDelete={onDelete}\n          onEdit={onEdit}\n        />\n      ))}\n    </div>\n  );\n};"
+    },
+    "src/components/TodoItem.tsx": {
+      "type": "react-component",
+      "purpose": "Individual todo item with edit and delete functionality",
+      "features": ["Inline editing", "Delete confirmation", "Completion toggle", "Keyboard shortcuts"],
+      "props": ["todo", "onToggle", "onDelete", "onEdit"],
+      "state": ["isEditing", "editTitle", "editDescription", "isDeleting"],
+      "content": "Complex React component with inline editing, delete confirmation, and rich interactions. Includes keyboard event handling, ref management, and conditional rendering based on editing/deleting states."
+    },
+    "src/components/TodoFilter.tsx": {
+      "type": "react-component",
+      "purpose": "Filter controls and statistics display",
+      "props": ["status", "setStatus", "totalActive", "totalCompleted", "total", "onClearCompleted"],
+      "features": ["Filter buttons", "Task counts", "Clear completed action"],
+      "content": "import React from 'react';\nimport { TodoStatus } from '../types/todo';\n\ninterface TodoFilterProps {\n  status: TodoStatus;\n  setStatus: (status: TodoStatus) => void;\n  totalActive: number;\n  totalCompleted: number;\n  total: number;\n  onClearCompleted: () => void;\n}\n\nconst TodoFilter: React.FC<TodoFilterProps> = ({\n  status,\n  setStatus,\n  totalActive,\n  totalCompleted,\n  total,\n  onClearCompleted\n}) => {\n  const filters: { label: string; value: TodoStatus }[] = [\n    { label: 'All', value: 'all' },\n    { label: 'Active', value: 'active' },\n    { label: 'Completed', value: 'completed' }\n  ];\n  \n  // Component JSX continues...\n};"
+    },
+    "src/utils/storage.ts": {
+      "type": "utility",
+      "purpose": "Local storage operations for todo persistence",
+      "functions": ["getTodosFromStorage", "saveTodosToStorage"],
+      "features": ["Error handling", "Date serialization", "Type safety"],
+      "content": "import { Todo } from '../types/todo';\n\nconst STORAGE_KEY = 'todo-app-tasks';\n\nexport const getTodosFromStorage = (): Todo[] => {\n  const storedTodos = localStorage.getItem(STORAGE_KEY);\n  if (!storedTodos) return [];\n  \n  try {\n    const parsedTodos = JSON.parse(storedTodos);\n    // Convert string dates back to Date objects\n    return parsedTodos.map((todo: any) => ({\n      ...todo,\n      createdAt: new Date(todo.createdAt)\n    }));\n  } catch (error) {\n    console.error('Failed to parse todos from localStorage:', error);\n    return [];\n  }\n};\n\nexport const saveTodosToStorage = (todos: Todo[]): void => {\n  try {\n    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));\n  } catch (error) {\n    console.error('Failed to save todos to localStorage:', error);\n  }\n};"
+    }
+  },
+  "features": {
+    "core": [
+      "Add new todos with optional descriptions",
+      "Mark todos as complete/incomplete", 
+      "Edit todo titles and descriptions",
+      "Delete todos with confirmation",
+      "Filter todos by status (all/active/completed)",
+      "Clear all completed todos",
+      "Persistent storage using localStorage",
+      "Responsive design",
+      "Modern UI with animations"
+    ],
+    "technical": [
+      "Dual implementation (Vanilla JS + React TypeScript)",
+      "Type safety with TypeScript interfaces",
+      "Custom React hooks for state management",
+      "Component-based architecture",
+      "CSS variables for theming",
+      "Tailwind CSS integration",
+      "Vite build system",
+      "ESLint configuration",
+      "Error handling for storage operations",
+      "Date handling and serialization"
+    ]
+  },
+  "dataModels": {
+    "Todo": {
+      "id": "string (UUID)",
+      "title": "string",
+      "description": "string (optional)",
+      "completed": "boolean", 
+      "createdAt": "Date"
+    },
+    "TodoStatus": "union type: 'all' | 'active' | 'completed'"
+  },
+  "dependencies": {
+    "runtime": {
+      "react": "^18.3.1",
+      "react-dom": "^18.3.1", 
+      "lucide-react": "^0.344.0"
+    },
+    "development": {
+      "typescript": "^5.5.3",
+      "vite": "^5.4.2",
+      "@vitejs/plugin-react": "^4.3.1",
+      "tailwindcss": "^3.4.1",
+      "eslint": "^9.9.1",
+      "autoprefixer": "^10.4.18",
+      "postcss": "^8.4.35"
+    }
+  },
+  "buildSystem": {
+    "bundler": "Vite",
+    "language": "TypeScript",
+    "framework": "React",
+    "styling": "Tailwind CSS",
+    "linting": "ESLint",
+    "scripts": {
+      "dev": "Start development server",
+      "build": "Build for production", 
+      "lint": "Run ESLint",
+      "preview": "Preview production build"
+    }
+  },
+  "architecture": {
+    "pattern": "Component-based with custom hooks",
+    "stateManagement": "React useState + custom hook",
+    "persistence": "Browser localStorage",
+    "styling": "Utility-first CSS with Tailwind",
+    "typeSystem": "TypeScript with strict type checking"
+  }
+}
